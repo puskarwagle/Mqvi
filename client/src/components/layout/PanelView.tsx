@@ -9,7 +9,6 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useUIStore } from "../../stores/uiStore";
 import { useChannelStore } from "../../stores/channelStore";
 import { useIsMobile } from "../../hooks/useMediaQuery";
@@ -33,7 +32,6 @@ function PanelView({
   sendTyping,
   sendDMTyping,
 }: PanelViewProps) {
-  const { t } = useTranslation("chat");
   const isMobile = useIsMobile();
   const panel = useUIStore((s) => s.panels[panelId]);
   const setActivePanel = useUIStore((s) => s.setActivePanel);
@@ -177,17 +175,9 @@ function PanelView({
       {/* Tab bar */}
       <PanelTabBar panelId={panelId} />
 
-      {/* Content */}
+      {/* Content — no open tab: show friends list (our home view) */}
       {!activeTab ? (
-        <div className="no-channel">
-          <div className="no-channel-inner">
-            <span className="no-channel-title">{t("noChannel")}</span>
-            {/* The sidebar is a drawer on mobile — point at the hamburger, not "the left". */}
-            <span className="no-channel-hint">
-              {isMobile ? t("noChannelHintMobile") : t("noChannelHint")}
-            </span>
-          </div>
-        </div>
+        <FriendsView />
       ) : activeTab.type === "text" ? (
         <ChatArea
           channelId={activeTab.channelId}
