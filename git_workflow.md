@@ -4,6 +4,8 @@ Why the rules below exist: commits should be reviewable (one concern each), reve
 
 Remotes: `origin` = our fork (`puskarwagle/Mqvi`, push/PR here). `upstream` = third-party `akinalpfdn/Mqvi` — read-only sync source. Never push to it, never open PRs against it.
 
+Branches: `dev` is the default integration branch — feature branches branch from it and PRs target it. `main` is a pristine mirror of `upstream/main`: never commit to it, only fast-forward it (`git fetch upstream main:main`). To compare our work against upstream: `git log --oneline main..dev`.
+
 Commands (client/ directory unless noted): `npx tsc -b` (typecheck), `npm run lint` (ESLint), `npm run test` (Vitest, run once), `npm run build` (`tsc -b && vite build`).
 Server changes (`server/`) need `go build` / `go test`, but this machine has no Go toolchain — server changes cannot be verified locally (flag this and ask).
 
@@ -15,7 +17,7 @@ Server changes (`server/`) need `go build` / `go test`, but this machine has no 
 
 ## Hard rules
 
-1. Never push to `main`. Never force-push. Never use `--no-verify`. Land changes only through a PR merged in the GitHub UI.
+1. Never push to `main` (pristine upstream mirror). Never push feature work directly to `dev` either. Never force-push. Never use `--no-verify`. Land changes only through a PR merged in the GitHub UI.
 2. PRs target OUR fork only. Bare `gh` commands in this clone resolve to the
    third-party repo (verified: `gh repo view` follows the fork parent, and the
    `GH_REPO` env var is ignored by this gh build), so pass `-R puskarwagle/Mqvi`
@@ -40,7 +42,8 @@ Run and inspect:
 
 Then:
 - **Detached HEAD, or merge/rebase in progress:** stop and tell the user.
-- **On `main`:** do not commit here. Run `git fetch origin main`, then `git checkout -b feature/<short-name>` (e.g. `feature/dm-translation-ui`). Choose a short kebab-case name from the changes. Uncommitted changes carry over. If `main` is behind `origin/main` and checkout would conflict, stop and ask.
+- **On `dev`:** do not commit here. Run `git fetch origin dev`, then `git checkout -b feature/<short-name>` (e.g. `feature/dm-translation-ui`). Choose a short kebab-case name from the changes. Uncommitted changes carry over. If `dev` is behind `origin/dev` and checkout would conflict, stop and ask.
+- **On `main`:** stop and switch to `dev` — `main` is the pristine upstream mirror, never a work branch.
 - **On another branch:** use it. If it is clearly unrelated to the changes in the working tree, ask.
 - **Already-staged files:** note them. Unstage with `git restore --staged -- <path>` before regrouping, and tell the user you did.
 - **Secrets check:** scan the diff for key/token/password patterns (e.g. `AKIA`, `sk-`, `ghp_`, `BEGIN PRIVATE KEY`, `api_key`, `secret=`). If anything looks like a credential, stop and report it.
@@ -127,16 +130,16 @@ List the candidates with a one-line reason each and **ask the user** whether to 
 
 Proceed automatically, without asking "push or leave local?", **only if all of these hold**: you are not on `main`; all checks in Step 4 passed; no ambiguity or secret flag is unresolved; the PR target is verified as our fork. Otherwise stop and report why.
 
-1. `git fetch origin main`
-2. `git merge origin/main`. Branching from an up-to-date `main` isn't enough, since `main` may have moved. If the merge has conflicts, stop and ask. Never resolve blindly, rebase, or force-push.
+1. `git fetch origin dev`
+2. `git merge origin/dev`. Branching from an up-to-date `dev` isn't enough, since `dev` may have moved. If the merge has conflicts, stop and ask. Never resolve blindly, rebase, or force-push.
 3. If the merge brought in changes (the branch moved), re-run `npx tsc -b`, `npm run lint`, `npm run test`, plus `npm run build` if applicable. If anything fails, stop and report.
 4. `git push -u origin <branch>`. If the push is rejected, stop and report. Don't force.
 5. Verify the target: `gh repo view -R puskarwagle/Mqvi --json nameWithOwner` must show `puskarwagle/Mqvi`. If it shows anything else, stop.
 6. Check for an existing PR: `gh pr list -R puskarwagle/Mqvi --head <branch> --json url,number`.
    - If one exists, pushing is enough. Report its URL. Never open a duplicate.
-   - If none exists: `gh pr create -R puskarwagle/Mqvi --base main --title "<title>" --body "<body>"`
+   - If none exists: `gh pr create -R puskarwagle/Mqvi --base dev --title "<title>" --body "<body>"`
      - **Title:** under 70 characters, plain English summary of the whole branch (no scope tag). Example: `DM translation UI with language badges`.
-     - **Body:** a short "What and why" paragraph, a bullet list of the commits (`git log --oneline origin/main..HEAD`), and the check results. State explicitly that the base is our fork's `main`, not upstream.
+     - **Body:** a short "What and why" paragraph, a bullet list of the commits (`git log --oneline origin/dev..HEAD`), and the check results. State explicitly that the base is our fork's `dev`, not upstream.
    - If `gh` isn't authenticated or the command fails, stop and give the user the exact command to run.
 
 ## Final report
@@ -152,7 +155,7 @@ End with:
 ## Post-merge cleanup (separate task: run only when the user says the PR is merged)
 
 ```bash
-git checkout main && git pull --ff-only origin main
+git checkout dev && git pull --ff-only origin dev
 git fetch --prune
 git branch -d feature/<short-name>
 ```
