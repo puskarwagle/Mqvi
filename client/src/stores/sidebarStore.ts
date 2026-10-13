@@ -26,7 +26,7 @@ function loadPersistedSidebar(): PersistedSidebar {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<PersistedSidebar>;
       return {
-        isExpanded: typeof parsed.isExpanded === "boolean" ? parsed.isExpanded : true,
+        isExpanded: typeof parsed.isExpanded === "boolean" ? parsed.isExpanded : false,
         expandedSections:
           parsed.expandedSections && typeof parsed.expandedSections === "object"
             ? parsed.expandedSections
@@ -37,7 +37,7 @@ function loadPersistedSidebar(): PersistedSidebar {
     /* parse error — use defaults */
   }
   return {
-    isExpanded: true,
+    isExpanded: false,
     expandedSections: { friends: true, dms: true, server: true },
   };
 }
