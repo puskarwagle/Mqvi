@@ -758,6 +758,19 @@ button.ch-tree-vu-stream svg { width:21px;height:21px; }
 .msg-text { font-size:13px;line-height:1.45;color:var(--t0);white-space:pre-wrap;word-break:break-word; }
 .msg-text code { font-family:var(--f-m);font-size:13px;background:var(--bg-0);padding:1px 5px;border-radius:3px;border:1px solid var(--b1);color:var(--teal); }
 .msg-edited { font-size:13px;color:var(--t3);margin-left:4px; }
+.msg-lang { margin-top:2px;font-size:11px;line-height:1.5;color:var(--t3); }
+.msg-lang-name { opacity:.85; }
+.msg-lang-romaji { display:block;white-space:pre-wrap;word-break:break-word; }
+.msg-lang-trans { display:block;white-space:pre-wrap;word-break:break-word; }
+
+/* Messenger-style DM bubbles — theirs left, mine right (DMs only, channels untouched). */
+.msg.dm-own .msg-row { flex-direction:row-reverse; }
+.msg.dm-own .msg-avatar { display:none; }
+.msg.dm-own .msg-meta .msg-avatar-inline { display:none; }
+.msg.dm-own .msg-meta { justify-content:flex-end; }
+.msg.dm-own .msg-name, .msg.dm-own .msg-badges { display:none; }
+.msg.dm-own .msg-body { background:var(--primary);border-color:transparent; }
+.msg.dm-own .msg-text, .msg.dm-own .msg-lang, .msg.dm-own .msg-time { color:#fff; }
 
 /* Message column is a query container — layout responds to the ACTUAL text-column width,
    not the window width (so split-view with both sidebars open reflows just like mobile). */

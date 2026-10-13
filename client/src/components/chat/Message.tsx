@@ -23,6 +23,7 @@ import MemberCard from "../members/MemberCard";
 import MentionAutocomplete from "./MentionAutocomplete";
 import MessageAttachments from "./MessageAttachments";
 import MessageHoverActions from "./MessageHoverActions";
+import MessageLanguageLine from "./MessageLanguageLine";
 import MessageReactions from "./MessageReactions";
 import MobileMessageActions from "./MobileMessageActions";
 import { useUserBadges } from "../../hooks/useUserBadges";
@@ -490,7 +491,7 @@ function Message({ message, isCompact }: MessageProps) {
       .slice(0, 5);
   }, [message.content]);
 
-  const msgClass = `msg${!isCompact ? " first-of-group" : " grouped"}${pickerSource ? " picker-open" : ""}${isMentioned ? " msg-mentioned" : ""}${isEditing ? " editing" : ""}`;
+  const msgClass = `msg${!isCompact ? " first-of-group" : " grouped"}${pickerSource ? " picker-open" : ""}${isMentioned ? " msg-mentioned" : ""}${isEditing ? " editing" : ""}${isOwner && mode === "dm" ? " dm-own" : ""}`;
 
   return (
     <div
@@ -666,6 +667,11 @@ function Message({ message, isCompact }: MessageProps) {
                 </span>
               )}
             </div>
+          )}
+
+          {/* Language badge + romaji — DMs only (translation-app experiment) */}
+          {mode === "dm" && message.content && (
+            <MessageLanguageLine text={message.content} />
           )}
 
           {/* Attachments */}

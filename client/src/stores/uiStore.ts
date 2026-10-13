@@ -241,7 +241,7 @@ export const useUIStore = create<UIState>((set, get) => ({
   panels: { [defaultPanelId]: defaultPanel },
   layout: { type: "leaf", panelId: defaultPanelId },
   activePanelId: defaultPanelId,
-  membersOpen: true,
+  membersOpen: false,
   quickSwitcherOpen: false,
   discoveryOpen: false,
 
