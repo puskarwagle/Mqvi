@@ -17,10 +17,10 @@ Server changes (`server/`) need `go build` / `go test`, but this machine has no 
 
 1. Never push to `main`. Never force-push. Never use `--no-verify`. Land changes only through a PR merged in the GitHub UI.
 2. PRs target OUR fork only. Bare `gh` commands in this clone resolve to the
-   third-party repo (verified: `gh repo view` follows the fork parent), so
-   prefix EVERY `gh` command with `GH_REPO=puskarwagle/Mqvi`. Never use
-   `--repo akinalpfdn/Mqvi`, never push branches to `upstream`, never open PRs
-   against the third-party repo.
+   third-party repo (verified: `gh repo view` follows the fork parent, and the
+   `GH_REPO` env var is ignored by this gh build), so pass `-R puskarwagle/Mqvi`
+   explicitly on EVERY `gh` command. Never use `-R akinalpfdn/Mqvi`, never push
+   branches to `upstream`, never open PRs against the third-party repo.
 3. One branch per feature, one PR per branch. Branch from an up-to-date `main`, never from another feature branch.
 4. Never use `git add .` or `git add -A` unless every changed file belongs to a single commit. Stage explicit paths only.
 5. Never commit unrelated changes together.
@@ -131,10 +131,10 @@ Proceed automatically, without asking "push or leave local?", **only if all of t
 2. `git merge origin/main`. Branching from an up-to-date `main` isn't enough, since `main` may have moved. If the merge has conflicts, stop and ask. Never resolve blindly, rebase, or force-push.
 3. If the merge brought in changes (the branch moved), re-run `npx tsc -b`, `npm run lint`, `npm run test`, plus `npm run build` if applicable. If anything fails, stop and report.
 4. `git push -u origin <branch>`. If the push is rejected, stop and report. Don't force.
-5. Verify the target under the pinned repo: `GH_REPO=puskarwagle/Mqvi gh repo view --json nameWithOwner` must show `puskarwagle/Mqvi`. If it shows anything else, stop.
-6. Check for an existing PR: `GH_REPO=puskarwagle/Mqvi gh pr list --head <branch> --json url,number`.
+5. Verify the target: `gh repo view -R puskarwagle/Mqvi --json nameWithOwner` must show `puskarwagle/Mqvi`. If it shows anything else, stop.
+6. Check for an existing PR: `gh pr list -R puskarwagle/Mqvi --head <branch> --json url,number`.
    - If one exists, pushing is enough. Report its URL. Never open a duplicate.
-   - If none exists: `GH_REPO=puskarwagle/Mqvi gh pr create --base main --title "<title>" --body "<body>"`
+   - If none exists: `gh pr create -R puskarwagle/Mqvi --base main --title "<title>" --body "<body>"`
      - **Title:** under 70 characters, plain English summary of the whole branch (no scope tag). Example: `DM translation UI with language badges`.
      - **Body:** a short "What and why" paragraph, a bullet list of the commits (`git log --oneline origin/main..HEAD`), and the check results. State explicitly that the base is our fork's `main`, not upstream.
    - If `gh` isn't authenticated or the command fails, stop and give the user the exact command to run.
@@ -157,4 +157,4 @@ git fetch --prune
 git branch -d feature/<short-name>
 ```
 
-If `-d` refuses because the PR was squash-merged (git sees the branch as unmerged), confirm the PR shows as merged with `gh pr view <branch> --json state`, then use `git branch -D feature/<short-name>`.
+If `-d` refuses because the PR was squash-merged (git sees the branch as unmerged), confirm the PR shows as merged with `gh pr view -R puskarwagle/Mqvi <branch> --json state`, then use `git branch -D feature/<short-name>`.
